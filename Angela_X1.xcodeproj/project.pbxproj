@@ -13,6 +13,8 @@
 		0B205D3F1F804E3500DB3B6E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D3D1F804E3500DB3B6E /* Main.storyboard */; };
 		0B205D411F804E3500DB3B6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D401F804E3500DB3B6E /* Assets.xcassets */; };
 		0B205D441F804E3500DB3B6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D421F804E3500DB3B6E /* LaunchScreen.storyboard */; };
+		0B205D4D1F8050E200DB3B6E /* UIViewController+SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */; };
+		0B205D501F807BD700DB3B6E /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,10 @@
 		0B205D401F804E3500DB3B6E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B205D431F804E3500DB3B6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0B205D451F804E3500DB3B6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0B205D4B1F8050E200DB3B6E /* UIViewController+SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SettingsViewController.h"; sourceTree = "<group>"; };
+		0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SettingsViewController.m"; sourceTree = "<group>"; };
+		0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		0B205D511F807CC500DB3B6E /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = ../Constants.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B205D501F807BD700DB3B6E /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,6 +51,7 @@
 			children = (
 				0B205D331F804E3500DB3B6E /* Angela_X1 */,
 				0B205D321F804E3500DB3B6E /* Products */,
+				0B205D4E1F807BD700DB3B6E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,11 +66,14 @@
 		0B205D331F804E3500DB3B6E /* Angela_X1 */ = {
 			isa = PBXGroup;
 			children = (
+				0B205D511F807CC500DB3B6E /* Constants.h */,
 				0B205D371F804E3500DB3B6E /* AppDelegate.h */,
 				0B205D381F804E3500DB3B6E /* AppDelegate.m */,
 				0B205D3A1F804E3500DB3B6E /* ViewController.h */,
 				0B205D3B1F804E3500DB3B6E /* ViewController.m */,
 				0B205D3D1F804E3500DB3B6E /* Main.storyboard */,
+				0B205D4B1F8050E200DB3B6E /* UIViewController+SettingsViewController.h */,
+				0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */,
 				0B205D401F804E3500DB3B6E /* Assets.xcassets */,
 				0B205D421F804E3500DB3B6E /* LaunchScreen.storyboard */,
 				0B205D451F804E3500DB3B6E /* Info.plist */,
@@ -77,6 +88,14 @@
 				0B205D351F804E3500DB3B6E /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0B205D4E1F807BD700DB3B6E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -151,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B205D4D1F8050E200DB3B6E /* UIViewController+SettingsViewController.m in Sources */,
 				0B205D3C1F804E3500DB3B6E /* ViewController.m in Sources */,
 				0B205D391F804E3500DB3B6E /* AppDelegate.m in Sources */,
 				0B205D361F804E3500DB3B6E /* main.m in Sources */,
@@ -280,6 +300,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shirzad.Angela-X1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -292,6 +313,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shirzad.Angela-X1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
