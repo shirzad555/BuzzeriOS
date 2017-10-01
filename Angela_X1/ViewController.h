@@ -8,6 +8,31 @@
 
 #import <UIKit/UIKit.h>
 
+enum BLE_Char{
+    CHAR_LED_STATE      = 1,
+    CHAR_ALARM_RECEIVED = 2,
+    CHAR_ALARM_SETTING  = 3
+};
+
+enum LED_State {
+    LED_STATE_OFF       =   0x00,
+    LED_STATE_ON        =   0x01,
+    LED_STATE_FLASH_1   =   0x02,
+    LED_STATE_FLASH_2   =   0x04,
+    LED_STATE_FLASH_3   =   0x08,
+    LED_STATE_ERROR     =   0xFF
+};
+
+enum Alarm_Cmd {
+    ALARM_OFF       =   0x00,
+    ALARM_ON_SEN_1  =   0x01,
+    ALARM_ON_SEN_2  =   0x02,
+    ALARM_ON_SEN_3  =   0x03,
+    ALARM_ON_SEN_4  =   0x04,
+    ALARM_ON_SEN_5  =   0x05,
+    ALARM_ERROR     =   0xFF
+};
+
 @interface ViewController : UIViewController
 {
     __weak IBOutlet UIActivityIndicatorView *connectionIndicator;
