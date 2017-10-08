@@ -13,8 +13,8 @@
 		0B205D3F1F804E3500DB3B6E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D3D1F804E3500DB3B6E /* Main.storyboard */; };
 		0B205D411F804E3500DB3B6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D401F804E3500DB3B6E /* Assets.xcassets */; };
 		0B205D441F804E3500DB3B6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D421F804E3500DB3B6E /* LaunchScreen.storyboard */; };
-		0B205D4D1F8050E200DB3B6E /* UIViewController+SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */; };
 		0B205D501F807BD700DB3B6E /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */; };
+		0BAF73D81F8994F400035253 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BAF73D71F8994F400035253 /* SettingsViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,10 +28,10 @@
 		0B205D401F804E3500DB3B6E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B205D431F804E3500DB3B6E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0B205D451F804E3500DB3B6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0B205D4B1F8050E200DB3B6E /* UIViewController+SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SettingsViewController.h"; sourceTree = "<group>"; };
-		0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SettingsViewController.m"; sourceTree = "<group>"; };
 		0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		0B205D511F807CC500DB3B6E /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = ../Constants.h; sourceTree = "<group>"; };
+		0BAF73CD1F897E6F00035253 /* SettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		0BAF73D71F8994F400035253 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,9 +71,9 @@
 				0B205D381F804E3500DB3B6E /* AppDelegate.m */,
 				0B205D3A1F804E3500DB3B6E /* ViewController.h */,
 				0B205D3B1F804E3500DB3B6E /* ViewController.m */,
+				0BAF73CD1F897E6F00035253 /* SettingsViewController.h */,
+				0BAF73D71F8994F400035253 /* SettingsViewController.m */,
 				0B205D3D1F804E3500DB3B6E /* Main.storyboard */,
-				0B205D4B1F8050E200DB3B6E /* UIViewController+SettingsViewController.h */,
-				0B205D4C1F8050E200DB3B6E /* UIViewController+SettingsViewController.m */,
 				0B205D401F804E3500DB3B6E /* Assets.xcassets */,
 				0B205D421F804E3500DB3B6E /* LaunchScreen.storyboard */,
 				0B205D451F804E3500DB3B6E /* Info.plist */,
@@ -170,10 +170,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0B205D4D1F8050E200DB3B6E /* UIViewController+SettingsViewController.m in Sources */,
 				0B205D3C1F804E3500DB3B6E /* ViewController.m in Sources */,
 				0B205D391F804E3500DB3B6E /* AppDelegate.m in Sources */,
 				0B205D361F804E3500DB3B6E /* main.m in Sources */,
+				0BAF73D81F8994F400035253 /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +336,7 @@
 				0B205D4A1F804E3500DB3B6E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

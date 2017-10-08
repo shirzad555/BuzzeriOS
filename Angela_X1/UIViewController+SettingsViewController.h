@@ -10,4 +10,6 @@
 
 @interface UIViewController (SettingsViewController)
 
+//@interface ViewController : UIViewController
+
 @end
