@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import "Constants.h"
-#import "SettingsViewController.h"
+//#import "SettingsViewController.h"
 //#import "UIViewController+Settings.h"
 
 @import UserNotifications;
@@ -37,13 +37,31 @@ CBCentralManager *centralManager;
 
 CBPeripheral *sensorTag;
 BOOL keepScanning;
-char current_led_state; //= LED_STATE_OFF;
-char current_alarm_setting; //= ALARM_OFF;
+static enum LED_STATE current_led_state; //= LED_STATE_OFF;
+static enum ALARM_STATE current_alarm_state; //= LED_STATE_OFF;
+static enum ALARM_SENSITIVITY current_alarm_sensitivity; //= ALARM_OFF;
+static enum MOVEMENT_MSG current_movement_msg; //= LED_STATE_OFF;
+
 CBCharacteristic *ledCharacteristic;
+CBCharacteristic *alarmStateCharacteristic;
+CBCharacteristic *alarmSenCharacteristic;
+CBCharacteristic *alarmMsgCharacteristic;
+
+
+static bool current_swAlarm_state = false;
+static bool current_swBuzzer_state = false;
+static bool current_swLed_state = false;
+static bool current_swMsg_state = false;
+
+
 
 BOOL firstTimeLoading = true;
+//static int sensitivityValue;
 
 //NSString   *modelNumber;
+NSArray *ledStateArray ;
+NSArray *alarmStateArray ;
+
 
 @interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate>
 
@@ -54,19 +72,20 @@ BOOL firstTimeLoading = true;
 //@property (nonatomic, assign) BOOL keepScanning;
 
 //@property (nonatomic, assign) char current_led_state; //= LED_STATE_OFF;
-//@property (nonatomic, assign) char current_alarm_setting; //= ALARM_OFF;
+//@property (nonatomic, assign) char current_alarm_sensitivity; //= ALARM_OFF;
 
 //@property (nonatomic, strong) NSString * modelNumberStr;
 
 // Instance methods to grab device Manufacturer Name, Body Location
-- (void) getSystemID:(CBCharacteristic *)characteristic;
-- (void) getModelNumber:(CBCharacteristic *)characteristic;
-- (void) getSerialNumber:(CBCharacteristic *)characteristic;
-- (void) getFirmwareVersion:(CBCharacteristic *)characteristic;
-- (void) getHardwareVersion:(CBCharacteristic *)characteristic;
-- (void) getSoftwareVersion:(CBCharacteristic *)characteristic;
-- (void) getMfgName:(CBCharacteristic *)characteristic;
+- (void) setSystemID:(CBCharacteristic *)characteristic;
+- (void) setModelNumber:(CBCharacteristic *)characteristic;
+- (void) setSerialNumber:(CBCharacteristic *)characteristic;
+- (void) setFirmwareVersion:(CBCharacteristic *)characteristic;
+- (void) setHardwareVersion:(CBCharacteristic *)characteristic;
+- (void) setSoftwareVersion:(CBCharacteristic *)characteristic;
+- (void) setMfgName:(CBCharacteristic *)characteristic;
 
+- (void) UpdateAlarmState;
 
 @end
 
@@ -80,12 +99,14 @@ BOOL firstTimeLoading = true;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-
+    
+    ledStateArray = [NSArray arrayWithObjects:   @"OFF",   @"ON",   @"FLASH_1",  @"FLASH_2", @"FLASH_3", @"ERROR", nil];
+    alarmStateArray = [NSArray arrayWithObjects:   @"OFF",   @"BUZZER",   @"LED",  @"MSG", @"BUZ/LED", @"BUZ/MSG", @"LED/MSG", @"BUZ/LED/MSG", @"ERROR", nil];
     if(firstTimeLoading)
     {
         //[connectionIndicator startAnimating];
 //        connectionIndicator.hidesWhenStopped = true;
-//        [self ConnectionState:false];
+        [self ConnectionState:false];
     
         // Create the CBCentralManager.
         // NOTE: Creating the CBCentralManager with initWithDelegate will immediately call centralManagerDidUpdateState.
@@ -96,8 +117,27 @@ BOOL firstTimeLoading = true;
         firstTimeLoading = false;
     
     }
+    else{
+        [self ConnectionState:true];
+    }
     connectionIndicator.hidesWhenStopped = true;
-    [self ConnectionState:!firstTimeLoading];
+    
+    
+    bool tempBool;
+    
+    [self GetUiState:SW_ALARM_STATE char_value:&tempBool];
+    [self.switchAlarmOutlet setOn:tempBool];
+    
+    [self GetUiState:SW_BUZZER_STATE char_value:&tempBool];
+    [self.switchBuzzer setOn:tempBool];
+    [self GetUiState:SW_LED_STATE char_value:&tempBool];
+    [self.switchLight setOn:tempBool];
+    [self GetUiState:SW_MSG_STATE char_value:&tempBool];
+    [self.switchMessage setOn:tempBool];
+
+    self.switchBuzzer.enabled = !self.switchAlarmOutlet.isOn;
+    self.switchLight.enabled = !self.switchAlarmOutlet.isOn;
+    self.switchMessage.enabled = !self.switchAlarmOutlet.isOn;
     
 }
 
@@ -119,16 +159,23 @@ BOOL firstTimeLoading = true;
 
 - (IBAction)switchAlarm:(UISwitch *)sender {
 
-    char  ledState = LED_STATE_FLASH_1;
-    NSData *enableBytes = [NSData dataWithBytes:&ledState length:sizeof(char)];
+    char  alarmState;
+    
+    self.switchBuzzer.enabled = !self.switchAlarmOutlet.isOn;
+    self.switchLight.enabled = !self.switchAlarmOutlet.isOn;
+    self.switchMessage.enabled = !self.switchAlarmOutlet.isOn;
+    
+    [self UpdateAlarmState]; // Read alarm setting switches and update alarm state
     
     // Read the latest status for LED to be up to date //
-    [sensorTag readValueForCharacteristic:ledCharacteristic]; // readValue(for characteristic: CBCharacteristic)
+//    [sensorTag readValueForCharacteristic:alarmStateCharacteristic]; // readValue(for characteristic: CBCharacteristic)
     
-    [self SetParameter:CHAR_LED_STATE length:1 char_value:&ledState];
-    [self GetParameter:CHAR_LED_STATE char_value:&ledState];
-    [sensorTag writeValue:enableBytes forCharacteristic:ledCharacteristic type:CBCharacteristicWriteWithResponse];
+    //[self SetParameter:CHAR_ALARM_STATE length:1 char_value:&alarmState];
+    [self GetParameter:CHAR_ALARM_STATE char_value:&alarmState];
+    NSData *enableBytes = [NSData dataWithBytes:&alarmState length:sizeof(char)];
+    [sensorTag writeValue:enableBytes forCharacteristic:alarmStateCharacteristic type:CBCharacteristicWriteWithResponse]; //  // 
     
+ 
     
     /******************* Notifications **********************************/
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -171,9 +218,8 @@ BOOL firstTimeLoading = true;
     // Dispose of any resources that can be recreated.
 }
 
-
 - (char)SetParameter:(char)param length:(char) len char_value: (char*) value  {
-    char fahrenheit = 1;
+    char errorLog = 0;
     switch(param)
     {
         case CHAR_LED_STATE:
@@ -185,52 +231,130 @@ BOOL firstTimeLoading = true;
         case CHAR_ALARM_SEN:
             if(len == 1)
             {
-                current_alarm_setting = *(char*)value;
+                current_alarm_sensitivity = *(char*)value;
             }
             break;
         case CHAR_ALARM_STATE:
+            if(len == 1)
+            {
+                current_alarm_state = *(char*)value;
+            }
+            break;
+        case CHAR_MOVEMENT_MSG:
+            if(len == 1)
+            {
+                current_movement_msg = *(char*)value;
+            }
             break;
         default:
             break;
     }
-    return fahrenheit;
+    return errorLog;
 }
 
 - (char)GetParameter:(char)param  char_value: (char*) value  {
-    char fahrenheit = 1;
+    char errorLog = 0;
     switch(param)
     {
         case CHAR_LED_STATE:
             *(char*)value = current_led_state;
             break;
         case CHAR_ALARM_SEN:
-            *(char*)value = current_alarm_setting;
+            *(char*)value = current_alarm_sensitivity;
             break;
         case CHAR_ALARM_STATE:
-            //self.current_led_state = LED_STATE_OFF;
+            *(char*)value = current_alarm_state;
+            break;
+        case CHAR_MOVEMENT_MSG:
+            *(char*)value = current_movement_msg;
             break;
         default:
             break;
     }
-    return fahrenheit;
+    return errorLog;
+}
+
+- (char)SetUiState:(enum UI_MAIN_STATE)param length:(char) len char_value: (bool*) state  {
+    char errorLog = 0;
+    switch(param)
+    {
+        case SW_ALARM_STATE:
+            if(len == 1)
+            {
+                current_swAlarm_state = *(bool*)state;
+            }
+            break;
+        case SW_BUZZER_STATE:
+            if(len == 1)
+            {
+                current_swBuzzer_state = *(bool*)state;
+            }
+            break;
+        case SW_LED_STATE:
+            if(len == 1)
+            {
+                current_swLed_state = *(bool*)state;
+            }
+            break;
+        case SW_MSG_STATE:
+            if(len == 1)
+            {
+                current_swMsg_state = *(bool*)state;
+            }
+            break;
+        default:
+            break;
+    }
+    return errorLog;
+}
+
+
+- (char)GetUiState:(enum UI_MAIN_STATE)param  char_value: (bool*) state  {
+    char errorLog = 0;
+    switch(param)
+    {
+        case SW_ALARM_STATE:
+            *(bool*)state = current_swAlarm_state;
+            break;
+        case SW_BUZZER_STATE:
+            *(bool*)state = current_swBuzzer_state;
+            break;
+        case SW_LED_STATE:
+            *(bool*)state = current_swLed_state;
+            break;
+        case SW_MSG_STATE:
+            *(bool*)state = current_swMsg_state;
+            break;
+        default:
+            break;
+    }
+    return errorLog;
 }
 
 - (void)ConnectionState:(BOOL)state  {
-    if (state == true)
+    if (state == true) // when connection is good
     {
         [connectionIndicator stopAnimating];
         self.labelSearching.text = @"Connected";
+        self.switchBuzzer.enabled = !self.switchAlarmOutlet.isOn;
+        self.switchLight.enabled = !self.switchAlarmOutlet.isOn;
+        self.switchMessage.enabled = !self.switchAlarmOutlet.isOn;
     }
-    else
+    else // when connection is lost
     {
         [connectionIndicator startAnimating];
-        self.labelSearching.text = @"Searching";        
+        self.labelSearching.text = @"Searching";
     }
     //self.labelSearching.hidden = state;
     self.uiTextConnectUSB.hidden = state;
     self.labelAlarm.hidden = !state;
     self.switchAlarmOutlet.hidden = !state;
     self.buttonSettingOutlet.hidden = !state;
+    
+    self.switchBuzzer.hidden = !state;
+    self.switchLight.hidden = !state;
+    self.switchMessage.hidden = !state;
+    
 }
 
 #pragma mark - CBCentralManagerDelegate methods
@@ -356,7 +480,7 @@ BOOL firstTimeLoading = true;
         
         // Model Number
         if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_MODEL_NUM]]) {
-            NSLog(@"UUID_MODEL_NUM: %@ \n\r", characteristic.UUID); // Shirzad
+            //NSLog(@"UUID_MODEL_NUM: %@ \n\r", characteristic.UUID); // Shirzad
             //modelNumberStr = characteristic.description;
             //modelNumberStr = [[NSString alloc] initWithData:characteristic.value encoding:NSASCIIStringEncoding]; //characteristic.value;
             //NSLog(@"+++++++=======+++++++: %@ \n\r", [[NSString alloc] initWithData:characteristic.value encoding:NSASCIIStringEncoding]);
@@ -387,20 +511,24 @@ BOOL firstTimeLoading = true;
         if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_ALARM_STATE]]) {
             // Enable Temperature Sensor notification
             //[self.sensorTag setNotifyValue:YES forCharacteristic:characteristic];
-            NSLog(@"UUID_ALARM_STATE: %@ \n\r", characteristic.UUID); // Shirzad
-            
+            //NSLog(@"UUID_ALARM_STATE: %@ \n\r", characteristic.UUID); // Shirzad
+            alarmStateCharacteristic = characteristic;
+            [sensorTag readValueForCharacteristic:characteristic];
         }
         
         if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_LED_STATUS]]) {
             // Enable Temperature Sensor
-            NSLog(@"UUID_LED_STATUS: %@ \n\r", characteristic.UUID); // Shirzad
+            //NSLog(@"UUID_LED_STATUS: %@ \n\r", characteristic.UUID); // Shirzad
             ledCharacteristic = characteristic;
+            [sensorTag readValueForCharacteristic:characteristic];
             //[self.sensorTag writeValue:enableBytes forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
         }
         
         if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_ALARM_SEN]]) {
             // Enable Temperature Sensor notification
-            NSLog(@"UUID_ALRAM_SEN: %@ \n\r", characteristic.UUID); // Shirzad
+            //NSLog(@"UUID_ALRAM_SEN: %@ \n\r", characteristic.UUID); // Shirzad
+            alarmSenCharacteristic = characteristic;
+            [sensorTag readValueForCharacteristic:characteristic];
             //self.temperatureLabel.text = [NSString stringWithFormat:@"HOLA!!"]; // Shirzad
             //let value: [UInt8] = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]
             //let data = NSData(bytes: value, length: 7)
@@ -409,7 +537,9 @@ BOOL firstTimeLoading = true;
         }
         
         if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_MVMNT_MSG]]) {
-            NSLog(@"UUID_MVMNT_MSG************************: %@ \n\r", characteristic.UUID); // Shirzad
+            //NSLog(@"UUID_MVMNT_MSG: %@ \n\r", characteristic.UUID); // Shirzad
+            alarmMsgCharacteristic = characteristic;
+            [sensorTag readValueForCharacteristic:characteristic];
         }
         
         /*        // Humidity
@@ -443,52 +573,55 @@ BOOL firstTimeLoading = true;
             [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)]; // [dataBytes getBytes:&dataArray length:dataLength * sizeof(uint16_t)];
             // char rawAmbientTemp = dataArray[0];
             // NSLog(@"characteristic VALUE ======  %@ \n\r", characteristic.value); // Shirzad
-            NSLog(@"LED State Length ======  %lu \n\r", (unsigned long)dataBytes.length); // Shirzad
-            NSLog(@"LED State VALUE ======  %u \n\r", (unsigned int)dataArray[0]); // Shirzad
+            //NSLog(@"LED State Length ======  %lu \n\r", (unsigned long)dataBytes.length); // Shirzad
+            NSLog(@"LED State VALUE = %u \n\r", (unsigned int)dataArray[0]); // Shirzad
             [self SetParameter:CHAR_LED_STATE length:dataBytes.length char_value:dataArray];
             //self.temperatureLabel.text = [NSString stringWithFormat:@"LED = %u", (unsigned int)dataArray[0]];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_ALARM_SEN]]) {
-            //[self displayTemperature:dataBytes];
-            
-            char dataArray[dataBytes.length]; // uint16_t dataArray[dataLength];
-            [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)]; // [dataBytes getBytes:&dataArray length:dataLength * sizeof(uint16_t)];
-            NSLog(@"Alarm Setting VALUE ======  %u \n\r", (unsigned int)dataArray[0]); // Shirzad
+            char dataArray[dataBytes.length];
+            [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)];
+            NSLog(@"Alarm Setting VALUE = %u \n\r", (unsigned int)dataArray[0]);
             [self SetParameter:CHAR_ALARM_SEN length:dataBytes.length char_value:dataArray];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_ALARM_STATE]]) {
-            //[self displayHumidity:dataBytes];
-            char dataArray[dataBytes.length]; // uint16_t dataArray[dataLength];
-            [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)]; // [dataBytes getBytes:&dataArray length:dataLength * sizeof(uint16_t)];
-            NSLog(@"********* Alarm VALUE ======  %u \n\r", (unsigned int)dataArray[0]); // Shirzad
+            char dataArray[dataBytes.length];
+            [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)];
+            NSLog(@"Alarm VALUE = %u \n\r", (unsigned int)dataArray[0]);
             [self SetParameter:CHAR_ALARM_SEN length:dataBytes.length char_value:dataArray];
         }
-        // Retrieve the characteristic value for model number received
+        else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_MVMNT_MSG]]) {
+            char dataArray[dataBytes.length];
+            [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)];
+            NSLog(@"Movement VALUE = %u \n\r", (unsigned int)dataArray[0]);
+            [self SetParameter:CHAR_MOVEMENT_MSG length:dataBytes.length char_value:dataArray];
+        }        
+        //////////// Retrieve the characteristic value for Device Info received /////////////////////////
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_SYSTEM_ID]]) {  // 2
-            [self getSystemID:characteristic];
+            [self setSystemID:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_MODEL_NUM]]) {  // 2
-            [self getModelNumber:characteristic];
+            [self setModelNumber:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_SERIAL_NUM]]) {  // 2
-            [self getSerialNumber:characteristic];
+            [self setSerialNumber:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_FIRMWARE_REV]]) {  // 2
-            [self getFirmwareVersion:characteristic];
+            [self setFirmwareVersion:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_HARDWARE_REV]]) {  // 2
-            [self getHardwareVersion:characteristic];
+            [self setHardwareVersion:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_SOFTWARE_REV]]) {  // 2
-            [self getSoftwareVersion:characteristic];
+            [self setSoftwareVersion:characteristic];
         }
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_MFG_NAME]]) {  // 2
-            [self getMfgName:characteristic];
+            [self setMfgName:characteristic];
         }
     }
 }
 
-
+/*
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
     if([segue.identifier isEqualToString:@"GoToSettingsSegue"]){
         SettingsViewController *settingView = (SettingsViewController *)segue.destinationViewController;
@@ -500,64 +633,134 @@ BOOL firstTimeLoading = true;
         settingView.hardwareVersionValueStr = hardwareVersionStr;
         settingView.softwareVersionValueStr = softwareVersionStr;
         settingView.mfgNameValueStr = mfgNameStr;
+        if ( current_led_state >= sizeof(ledStateArray))
+        {
+            settingView.ledStateValueStr = @"ERROR";////[NSString stringWithFormat:@"%d",current_led_state]; // [names objectAtIndex:0];
+        }
+        else{
+            settingView.ledStateValueStr = [ledStateArray  objectAtIndex:current_led_state];
+        }
+        if ( current_alarm_state >= sizeof(ledStateArray))
+        {
+            settingView.alarmStateValueStr = @"ERROR";
+        }
+        else{
+            settingView.alarmStateValueStr = [alarmStateArray  objectAtIndex:current_alarm_state];
+        }
+        settingView.sliderSensitivityValue = current_alarm_sensitivity;
     }
 }
-
+*/
  
  
 - (IBAction)buttonSettings:(id)sender {
-    NSLog(@"button  -- frame:");
+//    NSLog(@"button  -- frame:");
 //    SettingsViewController *secondController = [[SettingsViewController alloc] init];
 //    secondController.dataPass = @"hola hola";
     
     //[self performSegueWithIdentifier:@"WeekView" sender:self];
-    [self performSegueWithIdentifier:@"GoToSettingsSegue" sender:self];
+    
     
     // SettingsViewController *settingView = [[SettingsViewController alloc] initWithNibName:@"SettingViewController" bundle:nil];
+ //   SettingsViewController *secondController = [[SettingsViewController alloc] initWithiNibName:@"GoBackSegue"];
 
-//    [self pus]
+  //  SettingsViewController *secondController=[[SettingsViewController alloc] initWithNibName:@"GoBackSegue" bundle:nil];
+  //  SettingsViewController *secondController = [[SettingsViewController alloc] init];
+
+    bool tempBool;
     
+    tempBool = self.switchAlarmOutlet.isOn;
+    [self SetUiState:SW_ALARM_STATE length:1 char_value:&tempBool];
+    tempBool = self.switchBuzzer.isOn;
+    [self SetUiState:SW_BUZZER_STATE length:1 char_value:&tempBool];
+    tempBool = self.switchLight.isOn;
+    [self SetUiState:SW_LED_STATE length:1 char_value:&tempBool];
+    tempBool = self.switchMessage.isOn;
+    [self SetUiState:SW_MSG_STATE length:1 char_value:&tempBool];
+    
+    
+    char temp;
+    
+    SettingsViewController *secondController = [self.storyboard instantiateViewControllerWithIdentifier:@"SettingsViewController"];
+
+    secondController.systemIdValueStr = systemIdStr;
+    secondController.modelNumberValueStr = modelNumberStr;
+    secondController.serialNumberValueStr = serialNumberStr;
+    secondController.firmwareVersionValueStr = firmwareVersionStr;
+    secondController.hardwareVersionValueStr = hardwareVersionStr;
+    secondController.softwareVersionValueStr = softwareVersionStr;
+    secondController.mfgNameValueStr = mfgNameStr;
+    
+    [self GetParameter:CHAR_LED_STATE char_value:&temp];
+    if ( temp >= sizeof(ledStateArray))
+    {
+        secondController.ledStateValueStr = @"ERROR";////[NSString stringWithFormat:@"%d",current_led_state]; // [names objectAtIndex:0];
+    }
+    else{
+        secondController.ledStateValueStr = [ledStateArray  objectAtIndex:temp];
+    }
+    
+    [self GetParameter:CHAR_ALARM_STATE char_value:&temp];
+    if ( temp >= sizeof(ledStateArray))
+    {
+        secondController.alarmStateValueStr = @"ERROR";
+    }
+    else{
+        
+        secondController.alarmStateValueStr = [alarmStateArray  objectAtIndex:temp];
+    }
+    
+    [self GetParameter:CHAR_ALARM_SEN char_value:&temp];
+    secondController.sliderSensitivityValue = temp;
+    
+    [secondController setDelegate:self];
+    [self presentViewController:secondController animated:YES completion:nil];
+    //secondController.delegate = self; // protocol listener
+    //[self.navigationController pushViewController:secondController animated:YES];
+
+    // [self performSegueWithIdentifier:@"GoToSettingsSegue" sender:self];
+
 }
 
 //////////////////// GET Device Info //////////////////////////////////////////////////////////////////////////////
-- (void) getSystemID:(CBCharacteristic *)characteristic
+- (void) setSystemID:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     systemIdStr = [NSString stringWithFormat:@"%@", temp];    // 2
     return;
 }
-- (void) getModelNumber:(CBCharacteristic *)characteristic
+- (void) setModelNumber:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     modelNumberStr = [NSString stringWithFormat:@"%@", temp];    // 2
-    NSLog(@"Model Number = %@:", modelNumberStr);
+    //NSLog(@"Model Number = %@:", modelNumberStr);
     return;
 }
-- (void) getSerialNumber:(CBCharacteristic *)characteristic
+- (void) setSerialNumber:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     serialNumberStr = [NSString stringWithFormat:@"%@", temp];    // 2
     return;
 }
-- (void) getFirmwareVersion:(CBCharacteristic *)characteristic
+- (void) setFirmwareVersion:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     firmwareVersionStr = [NSString stringWithFormat:@"%@", temp];    // 2
     return;
 }
-- (void) getHardwareVersion:(CBCharacteristic *)characteristic
+- (void) setHardwareVersion:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     hardwareVersionStr = [NSString stringWithFormat:@"%@", temp];    // 2
     return;
 }
-- (void) getSoftwareVersion:(CBCharacteristic *)characteristic
+- (void) setSoftwareVersion:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     softwareVersionStr = [NSString stringWithFormat:@"%@", temp];    // 2
     return;
 }
-- (void) getMfgName:(CBCharacteristic *)characteristic
+- (void) setMfgName:(CBCharacteristic *)characteristic
 {
     NSString *temp = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];  // 1
     mfgNameStr = [NSString stringWithFormat:@"%@", temp];    // 2
@@ -565,5 +768,52 @@ BOOL firstTimeLoading = true;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+ Name:          UpdateAlarmState
+ Description:   Updates "current_alarm_state" based on latest state of alarm setting switches
+ */
+- (void)UpdateAlarmState {
+
+    char alarm_state;
+    
+    if ([self.switchAlarmOutlet isOn] == true)
+    {
+        if ([self.switchBuzzer isOn] == false && [self.switchLight isOn] == false && [self.switchMessage isOn] == false){
+            alarm_state = ALARM_STATE_OFF;    }
+        else if ([self.switchBuzzer isOn] == true && [self.switchLight isOn] == false && [self.switchMessage isOn] == false){
+            alarm_state = ALARM_STATE_BUZ;    }
+        else if ([self.switchBuzzer isOn] == false && [self.switchLight isOn] == true && [self.switchMessage isOn] == false){
+            alarm_state = ALARM_STATE_LED;    }
+        else if ([self.switchBuzzer isOn] == false && [self.switchLight isOn] == false && [self.switchMessage isOn] == true){
+            alarm_state = ALARM_STATE_MSG;    }
+        else if ([self.switchBuzzer isOn] == true && [self.switchLight isOn] == true && [self.switchMessage isOn] == false){
+            alarm_state = ALARM_STATE_BUZ_LED;    }
+        else if ([self.switchBuzzer isOn] == true && [self.switchLight isOn] == false && [self.switchMessage isOn] == true){
+            alarm_state = ALARM_STATE_BUZ_MSG;    }
+        else if ([self.switchBuzzer isOn] == false && [self.switchLight isOn] == true && [self.switchMessage isOn] == true){
+            alarm_state = ALARM_STATE_LED_MSG;    }
+        else if ([self.switchBuzzer isOn] == true && [self.switchLight isOn] == true && [self.switchMessage isOn] == true)    {
+            alarm_state = ALARM_STATE_BUZ_LED_MSG;}
+    }
+    else
+    {
+        alarm_state = ALARM_STATE_OFF;
+    }
+    [self SetParameter:CHAR_ALARM_STATE length:1 char_value:&alarm_state];
+    
+}
+
+
+
+-(void) sendDataToMainController:(char)dataIn
+{
+    char alarmSen = dataIn;
+    
+    [self SetParameter:CHAR_ALARM_SEN length:sizeof(char) char_value:&alarmSen];
+    [self GetParameter:CHAR_ALARM_SEN char_value:&alarmSen];
+    NSData *enableBytes = [NSData dataWithBytes:&alarmSen length:sizeof(char)];
+    
+    [sensorTag writeValue:enableBytes forCharacteristic:alarmSenCharacteristic type:CBCharacteristicWriteWithResponse];
+}
 
 @end

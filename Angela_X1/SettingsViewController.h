@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+
+@protocol SettingsDelegate <NSObject>
+- (void) sendDataToMainController:(char) dataSent;
+ @end
+
 @interface SettingsViewController : UIViewController
 
 
@@ -18,7 +23,10 @@
 @property (nonatomic, strong) NSString *hardwareVersionValueStr;
 @property (nonatomic, strong) NSString *softwareVersionValueStr;
 @property (nonatomic, strong) NSString *mfgNameValueStr;
+@property (nonatomic, strong) NSString *ledStateValueStr;
+@property (nonatomic, strong) NSString *alarmStateValueStr;
 
+@property int sliderSensitivityValue;
 
 @property (weak, nonatomic) IBOutlet UILabel *labelDeviceID;
 @property (weak, nonatomic) IBOutlet UILabel *labelModelNumber;
@@ -27,5 +35,24 @@
 @property (weak, nonatomic) IBOutlet UILabel *labelHardwareVersion;
 @property (weak, nonatomic) IBOutlet UILabel *labelSoftwareVersion;
 @property (weak, nonatomic) IBOutlet UILabel *labelManufacturer;
+@property (weak, nonatomic) IBOutlet UILabel *labelLedState;
+@property (weak, nonatomic) IBOutlet UILabel *labelAlarmState;
+
+@property (weak, nonatomic) IBOutlet UISlider *sliderSensitivityProp;
+- (IBAction)sliderSensitivity:(id)sender;
+
+
+@property (weak, nonatomic) IBOutlet UIButton *buttonBackToMain;
+- (IBAction)buttonBackToMain:(id)sender;
+
+//@property (weak)id <SettingsViewControllerDelegate> delegateSettings;
+@property (nonatomic, weak) id<SettingsDelegate> delegate;
 
 @end
+/*
+@protocol sendDataBack <NSObject >
+
+- (void) sendDataToPreviousController:(NSString *) testArray;
+
+@end
+ */
