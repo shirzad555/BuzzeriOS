@@ -155,6 +155,9 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dV8-5z-XbI">
                                 <rect key="frame" x="229" y="430" width="65" height="30"/>
                                 <state key="normal" title="Blink LED"/>
+                                <connections>
+                                    <action selector="buttonLedBlink:" destination="Y50-ca-0ZI" eventType="touchUpInside" id="kFo-rp-Bim"/>
+                                </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Movement Sensitivity" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tEj-IG-608">
                                 <rect key="frame" x="16" y="369" width="164" height="21"/>
@@ -332,6 +335,7 @@
                     </view>
                     <connections>
                         <outlet property="buttonBackToMain" destination="7IV-TA-c48" id="pFN-vA-4a1"/>
+                        <outlet property="buttonLedBlink" destination="dV8-5z-XbI" id="PMN-ND-NpW"/>
                         <outlet property="labelAlarmState" destination="zte-VU-c84" id="dOk-FB-T38"/>
                         <outlet property="labelDeviceID" destination="b2m-wL-iwr" id="5lN-YG-3ze"/>
                         <outlet property="labelFirmwareVersion" destination="AOA-p8-utr" id="8cb-1n-Bhh"/>

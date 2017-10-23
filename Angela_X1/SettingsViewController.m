@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "SettingsViewController.h"
+#import "ViewController.h"
 //#import "ViewController.h"
 
 /*
@@ -55,6 +56,12 @@
     
  //   [_delegate sendDataToPreviousController:textField];
 }
+
+- (IBAction)buttonLedBlink:(id)sender {
+    [self.delegate sendDataToLed:LED_STATE_FLASH_1];
+}
+
+
 
 
 /*

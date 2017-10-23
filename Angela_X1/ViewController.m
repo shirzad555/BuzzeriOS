@@ -816,4 +816,15 @@ NSArray *alarmStateArray ;
     [sensorTag writeValue:enableBytes forCharacteristic:alarmSenCharacteristic type:CBCharacteristicWriteWithResponse];
 }
 
+-(void) sendDataToLed:(char)ledVal
+{
+    char alarmSen = ledVal;
+    
+   // [self SetParameter:CHAR_ALARM_SEN length:sizeof(char) char_value:&ledVal];
+   // [self GetParameter:CHAR_ALARM_SEN char_value:&alarmSen];
+    NSData *enableBytes = [NSData dataWithBytes:&alarmSen length:sizeof(char)];
+    
+    [sensorTag writeValue:enableBytes forCharacteristic:ledCharacteristic type:CBCharacteristicWriteWithResponse];
+}
+
 @end

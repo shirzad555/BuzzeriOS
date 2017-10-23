@@ -11,7 +11,9 @@
 
 @protocol SettingsDelegate <NSObject>
 - (void) sendDataToMainController:(char) dataSent;
+- (void) sendDataToLed:(char) ledVal;
  @end
+
 
 @interface SettingsViewController : UIViewController
 
@@ -44,6 +46,9 @@
 
 @property (weak, nonatomic) IBOutlet UIButton *buttonBackToMain;
 - (IBAction)buttonBackToMain:(id)sender;
+
+@property (weak, nonatomic) IBOutlet UIButton *buttonLedBlink;
+- (IBAction)buttonLedBlink:(id)sender;
 
 //@property (weak)id <SettingsViewControllerDelegate> delegateSettings;
 @property (nonatomic, weak) id<SettingsDelegate> delegate;
