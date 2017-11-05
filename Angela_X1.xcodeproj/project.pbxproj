@@ -14,6 +14,7 @@
 		0B205D411F804E3500DB3B6E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D401F804E3500DB3B6E /* Assets.xcassets */; };
 		0B205D441F804E3500DB3B6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B205D421F804E3500DB3B6E /* LaunchScreen.storyboard */; };
 		0B205D501F807BD700DB3B6E /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */; };
+		0BA2290A1FAFB12400F0C0CF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BA229091FAFB12400F0C0CF /* AudioToolbox.framework */; };
 		0BAF73D81F8994F400035253 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BAF73D71F8994F400035253 /* SettingsViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,7 @@
 		0B205D451F804E3500DB3B6E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		0B205D511F807CC500DB3B6E /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = ../Constants.h; sourceTree = "<group>"; };
+		0BA229091FAFB12400F0C0CF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		0BAF73CD1F897E6F00035253 /* SettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		0BAF73D71F8994F400035253 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -39,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BA2290A1FAFB12400F0C0CF /* AudioToolbox.framework in Frameworks */,
 				0B205D501F807BD700DB3B6E /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +96,7 @@
 		0B205D4E1F807BD700DB3B6E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0BA229091FAFB12400F0C0CF /* AudioToolbox.framework */,
 				0B205D4F1F807BD700DB3B6E /* CoreBluetooth.framework */,
 			);
 			name = Frameworks;

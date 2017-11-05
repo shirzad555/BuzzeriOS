@@ -11,6 +11,7 @@
 #import "Constants.h"
 //#import "SettingsViewController.h"
 //#import "UIViewController+Settings.h"
+#import <AudioToolbox/AudioServices.h>
 
 @import UserNotifications;
 
@@ -54,6 +55,8 @@ static bool current_swLed_state = false;
 static bool current_swMsg_state = false;
 
 
+NSTimer * vibrateTimer;
+static int vibrateCounter = 0;
 
 BOOL firstTimeLoading = true;
 //static int sensitivityValue;
@@ -190,8 +193,8 @@ NSArray *alarmStateArray ;
     
     //Creating A Notification Request
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-    content.title = @"Don't forget";
-    content.body = @"Buy some milk";
+    content.title = @"ALERT FROM iDEVICE";
+    content.body = @"Check your iDevice";
     content.sound = [UNNotificationSound defaultSound];
     
     //Schedule a notification for a number of seconds later
@@ -540,6 +543,7 @@ NSArray *alarmStateArray ;
             //NSLog(@"UUID_MVMNT_MSG: %@ \n\r", characteristic.UUID); // Shirzad
             alarmMsgCharacteristic = characteristic;
             [sensorTag readValueForCharacteristic:characteristic];
+            [sensorTag setNotifyValue:YES forCharacteristic:characteristic];
         }
         
         /*        // Humidity
@@ -595,7 +599,13 @@ NSArray *alarmStateArray ;
             [dataBytes getBytes:&dataArray length:dataBytes.length * sizeof(uint8_t)];
             NSLog(@"Movement VALUE = %u \n\r", (unsigned int)dataArray[0]);
             [self SetParameter:CHAR_MOVEMENT_MSG length:dataBytes.length char_value:dataArray];
-        }        
+            if ([self.switchAlarmOutlet isOn] == true)
+            {
+                AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+                self.vibrateTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(vibratePhone) userInfo:nil repeats:YES];
+
+            }
+        }
         //////////// Retrieve the characteristic value for Device Info received /////////////////////////
         else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:UUID_SYSTEM_ID]]) {  // 2
             [self setSystemID:characteristic];
@@ -825,6 +835,22 @@ NSArray *alarmStateArray ;
     NSData *enableBytes = [NSData dataWithBytes:&alarmSen length:sizeof(char)];
     
     [sensorTag writeValue:enableBytes forCharacteristic:ledCharacteristic type:CBCharacteristicWriteWithResponse];
+}
+
+
+-(void)vibratePhone {
+    vibrateCounter = vibrateCounter +1;
+    
+    
+    if(vibrateCounter <= 10) {
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    }
+    else {
+        
+        //vibrated 5 times already kill timer and stop vibrating
+        [vibrateTimer invalidate];
+        
+    }
 }
 
 @end

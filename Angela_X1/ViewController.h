@@ -64,8 +64,6 @@ enum MOVEMENT_MSG {
 
 
 
-
-
 @interface ViewController : UIViewController <SettingsDelegate>
 {
     __weak IBOutlet UIActivityIndicatorView *connectionIndicator;
@@ -83,6 +81,7 @@ enum MOVEMENT_MSG {
 @property (weak, nonatomic) IBOutlet UISwitch *switchLight;
 @property (weak, nonatomic) IBOutlet UISwitch *switchMessage;
 
+@property (nonatomic, retain)NSTimer * vibrateTimer;
 
 @end
 
